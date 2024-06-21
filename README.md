@@ -2,7 +2,7 @@
 
 This script will load the Tuva Health seed data from AWS S3 into a Postgres database. 
 
-This script assuems you already have your AWS environment variables set. 
+This script assumes you already have your AWS environment variables set. 
 
 To use please create a `config.yml` file. You can use the `config.yml.example` as a template. 
 

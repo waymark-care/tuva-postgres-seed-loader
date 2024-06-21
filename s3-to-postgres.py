@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+
 import yaml
 import re
 import boto3
 import os
+import gzip
+import shutil
 import psycopg2
 import glob
 import csv
@@ -99,8 +103,10 @@ def load_files_to_postgres(download_dir, pg_connection_string, s3_paths, headers
 
             local_csv_path = file_path.replace('.gz', '')
 
-            # Decompress the file
-            os.system(f'gunzip -c {file_path} > {local_csv_path}')
+            # Decompress the file using gzip
+            with gzip.open(file_path, 'rb') as f_in:
+                with open(local_csv_path, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
 
             # Use COPY to load data with predefined headers
             copy_query = f"COPY {full_table_name} ({columns}) FROM STDIN WITH CSV DELIMITER ','"
