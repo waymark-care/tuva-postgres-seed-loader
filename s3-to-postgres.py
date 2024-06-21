@@ -37,7 +37,12 @@ def parse_dbt_project_yml(file_path):
 
 # Step 2: Download files from S3
 def download_files_from_s3(s3_paths, download_dir):
-    s3 = boto3.client('s3')
+    s3 = boto3.client(
+            service_name="s3",
+            region_name="us-east-1",
+            aws_access_key_id="AKIA2EPVNTV4FLAEBFGE",
+            aws_secret_access_key="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",
+        )
 
     for schema, table, s3_path, filename_pattern in s3_paths:
         bucket_name, s3_prefix = s3_path.split('/', 1)
