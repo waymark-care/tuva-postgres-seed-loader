@@ -41,7 +41,7 @@ def download_files_from_s3(s3_paths, download_dir):
 
     for schema, table, s3_path, filename_pattern in s3_paths:
         bucket_name, s3_prefix = s3_path.split('/', 1)
-        prefix = os.path.join(s3_prefix, filename_pattern.split('.')[0])
+        prefix = f"{s3_prefix}/{filename_pattern.split('.')[0]}"
         response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
         if 'Contents' in response:
             for obj in response['Contents']:
@@ -109,9 +109,9 @@ def load_files_to_postgres(download_dir, pg_connection_string, s3_paths, headers
                     shutil.copyfileobj(f_in, f_out)
 
             # Use COPY to load data with predefined headers
-            copy_query = f"COPY {full_table_name} ({columns}) FROM STDIN WITH CSV DELIMITER ','"
+            copy_query = f"COPY {full_table_name} ({columns}) FROM STDIN WITH CSV DELIMITER ',' ENCODING 'UTF8'"
 
-            with open(local_csv_path, 'r') as f:
+            with open(local_csv_path, 'r', encoding='utf-8') as f:
                 cur.copy_expert(copy_query, f)
 
             conn.commit()
