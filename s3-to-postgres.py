@@ -137,11 +137,6 @@ def load_files_to_postgres(download_dir, pg_connection_string, s3_paths, headers
                 copy_input = StringIteratorIO(iter)
                 cur.copy_expert(copy_query, copy_input)
 
-            # with open(local_csv_path, 'r', encoding='utf-8') as f:
-            #     cur.copy_expert(copy_query, f)
-            # with gzip.open(file_path, 'rt', encoding='utf-8') as gz_in:
-            #     cur.copy_expert(copy_query, gz_in)
-
             conn.commit()
             print(f"\tLoaded {file_path} into {full_table_name}")
         print(f"\tDone loading {full_table_name}!")
