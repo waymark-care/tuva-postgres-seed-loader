@@ -70,7 +70,9 @@ def read_headers(seeds_dir):
                 table_name = os.path.splitext(file)[0]
                 schema = os.path.basename(root)
                 file_path = os.path.join(root, file)
-                with open(file_path, 'r') as f:
+                # Some files are UTF-8 and others are UTF-8 with BOM (e.g.
+                # place_of_service)
+                with open(file_path, 'r', encoding="utf-8-sig") as f:
                     reader = csv.reader(f)
                     headers[f"{schema}__{table_name}"] = next(reader)
     return headers
@@ -98,7 +100,10 @@ def load_files_to_postgres(download_dir, pg_connection_string, s3_paths, headers
         base_filename = filename_pattern.split('.')[0]
         file_pattern = os.path.join(download_dir, f"{base_filename}.csv*.csv.gz")
         file_paths = glob.glob(file_pattern)
-        print(f"Starting load for {full_table_name}...")
+        print(f"Starting load for {full_table_name} ({len(file_paths)} files)...")
+        if not file_paths:
+            print("\tNo files found. Skipping...")
+            continue
 
         # Create schema if it doesn't exist
         if create_schema:
