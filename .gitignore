@@ -190,3 +190,5 @@ download/
 # ignore your config file - may have sensitive info
 config.yml
 
+# ignore custom direnv local file
+.envrc.local
