@@ -5,7 +5,7 @@ import glob
 import gzip
 import os
 import re
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import boto3
 import psycopg2
@@ -25,16 +25,32 @@ def parse_dbt_project_yml(file_path):
     seeds = dbt_project.get('seeds', {})
     s3_paths = []
 
+    # There are arbitrary depths of nesting in seeds, corresponding to the
+    # directory structure. But the way (so far) TUVA works is that only the last
+    # element in the hierarchy matters and is the schema that is used. So we'll
+    # just walk until we start finding nodes with a +post-hook and remember only
+    # the most recent "schema" (directory).
+    def process_level(lineage: List[str], node: Dict[str, Any]) -> None:
+        if '+post-hook' in node:
+            assert len(lineage) > 1
+            table = lineage[-1]
+            schema = lineage[-2]
+            match = re.search(r"load_seed\('([^']*)','([^']*)'", node['+post-hook'])
+            if match:
+                s3_path = match.group(1)
+                filename_pattern = match.group(2)
+                s3_paths.append((schema, table, s3_path, filename_pattern))
+            else:
+                print(f"{schema}.{table} did not match our load_seed expectations, skipping")
+        else:
+            # We may not be at the end of any hierarchy, so add each key onto
+            # the lineage and descend.
+            for key, value in node.items():
+                process_level(lineage + [key], value)
+
     for project, schemas in seeds.items():
         for schema, tables in schemas.items():
-            for table, config in tables.items():
-                if '+post-hook' in config:
-                    post_hook = config['+post-hook']
-                    match = re.search(r"load_seed\('([^']*)','([^']*)'", post_hook)
-                    if match:
-                        s3_path = match.group(1)
-                        filename_pattern = match.group(2)
-                        s3_paths.append((schema, table, s3_path, filename_pattern))
+            process_level([schema], tables)
 
     return s3_paths
 
