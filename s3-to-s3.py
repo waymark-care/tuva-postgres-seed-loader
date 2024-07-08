@@ -25,7 +25,7 @@ class SeedConfig:
         self.s3_prefix = f"{self.s3_prefix}/{self.filename_pattern}"
 
     def target_key(self) -> str:
-        return f"{self.s3_prefix}/{self.filename_pattern}_0.csv.gz"
+        return f"{self.s3_prefix}_0.csv.gz"
 
 
 @dataclass
