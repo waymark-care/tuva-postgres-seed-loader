@@ -155,13 +155,16 @@ def main(
     tmp_dir: Annotated[
         Optional[Path], typer.Option(help="Temporary directory to store data")
     ] = None,
+    target_s3_bucket_prefix: Annotated[
+        Optional[str], typer.Option(help="Prefix for S3 keys in the target bucket")
+    ] = None,
 ) -> None:
     if not tmp_dir:
         tmp_dir = Path("/tmp")
     dbt_project = _read_dbt_project_yml(tuva_version)
     seed_configs = _parse_dbt_project_yml(dbt_project)
     seed_data = _download_files_from_s3(seed_configs, tmp_dir)
-    _upload_data_to_s3(seed_data, target_s3_bucket, prefix="tuva")
+    _upload_data_to_s3(seed_data, target_s3_bucket, prefix=target_s3_bucket_prefix)
 
 
 if __name__ == "__main__":
