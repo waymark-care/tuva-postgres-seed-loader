@@ -27,5 +27,5 @@ stack-data==0.6.3
 traitlets==5.14.3
 typer==0.12.3
 typing_extensions==4.12.2
-urllib3==2.2.2
+urllib3==2.5.0
 wcwidth==0.2.13
